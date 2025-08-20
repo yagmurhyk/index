@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>Projeler Haritası</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+  <style>
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
+
+    .popup-content {
+      font-size: 12px;
+      max-width: 95vw;           /* genişlik biraz artırıldı */
+      font-family: Arial, sans-serif;
+      background: #fff;
+      padding: 15px;
+      border-radius: 20px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+      max-height: 250px;         /* yükseklik kısaltıldı */
+      overflow-y: auto;          /* uzun içerik için scroll */
+    }
+
+    .popup-content h3 {
+      margin: 0 0 8px 0;
+      font-size: 16px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .popup-content img {
+      width: 100%;
+      max-height: 25vh;          /* resim yüksekliği azaltıldı */
+      object-fit: cover;
+      border-radius: 12px;
+      margin-bottom: 10px;
+    }
+
+    .popup-content ul {
+      padding-left: 20px;
+      margin: 0 0 12px 0;
+    }
+
+    .popup-content li {
+      margin-bottom: 6px;
+    }
+
+    .popup-content button {
+      width: 90%;
+      padding: 12px 0;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.3s;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .popup-content button:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+  var map = L.map('map').setView([39.0, 35.0], 6);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap Katkıcıları'
+  }).addTo(map);
+
+  var projeler = [
+    {
+      isim: "Beyville Bodrum Projesi / Muğla",
+      konum: [37.1118, 27.7087],
+      ozet: [
+        "Muğla Milas / Beyciler mh.",
+        "Ada/Parsel 101 / 115",
+        "Daire Tipleri :",
+        "3+1 Daire, Net 95 m²",
+        "4+1 Daire, Net 110 m²",
+        "Beyville organik tarım ve at parkuru içeren, ikiz ve müstakil villalardan oluşan, toplamda havuzlu 54 villalık proje.",
+        "Başlangıç: 2023"
+      ],
+      resim: "https://www.dralpgayrimenkul.com/wp-content/uploads/2023/04/1_13-Foto-1-1.jpg",
+      link: "https://seninlinkin.com/istanbul"
+    },
+    {
+      isim: "Esenboğa 1 Projesi / Ankara",
+      konum: [40.0961, 32.9779],
+      ozet: [
+        "Ankara Akyurt / Balıkhisar mh.",
+        "Ada/Parsel 1842 / 2",
+        "Daire Tipi :",
+        "1+1 Daire, Net 40 m²",
+        "Esenboğa 1 Projesi, Esenboğa Havalimanı, Yıldırım Beyazıt Üniversitesi, ASELSAN ve büyük sanayi kuruluşlarına yakın.",
+        "Başlangıç: 2022 Bitiş: 2024"
+      ],
+      resim: "https://www.dralpgayrimenkul.com/wp-content/uploads/2024/04/dralp-ankara-esenboga1-gayrimenkul-projesi.jpg",
+      link: "https://www.dralpgayrimenkul.com/portfolio/esenboga-1/"
+    },
+    {
+      isim: "İzmir Projesi",
+      konum: [38.3571, 27.1216],
+      ozet: [
+        "İzmir Karabağlar/ Karabağlar mh.",
+        "Ada/Parsel 11448/1-2-4-5",
+        "Daire Tipleri :",
+        "1+1 Daire, Net 36 m² ve Net 46 m²",
+        "2+1 Daire, Net 56 m² ve Net 62 m²",
+        "Hızla büyüyen kentsel dönüşüm alanı, Fuar İzmir, Selway AVM, Optimum AVM, otobana direkt çıkış ve sanayi bölgelerine yakın",
+        "Başlangıç: 2024"
+      ],
+      resim: "https://www.dralpgayrimenkul.com/wp-content/uploads/2024/08/dralp-izmir-project-1.jpeg",
+      link: "https://www.dralpgayrimenkul.com/portfolio/izmir-project/"
+    }
+  ];
+
+  var markers = [];
+
+  projeler.forEach(function(proje) {
+    var ozetHTML = "<ul>";
+    proje.ozet.forEach(function(madde){
+      ozetHTML += `<li>${madde}</li>`;
+    });
+    ozetHTML += "</ul>";
+
+    var imgHTML = proje.resim ? `<img src="${proje.resim}" alt="${proje.isim}">` : '';
+    
+    var popupHTML = `
+      <div class="popup-content">
+        <h3>${proje.isim}</h3>
+        ${imgHTML}
+        ${ozetHTML}
+        <button onclick="window.open('${proje.link}', '_blank')">Detay</button>
+      </div>
+    `;
+
+    var popup = L.popup({
+      maxWidth: 250,
+      offset: [-180, 0],   // sol tarafa kaydırıldı
+      autoPan: true
+    }).setContent(popupHTML);
+
+    var marker = L.marker(proje.konum).addTo(map).bindPopup(popup);
+
+    marker.on('click', function() {
+      marker.openPopup();
+      map.once('popupopen', function(e) {
+        var popupHeight = e.popup._container.offsetHeight;
+        map.panBy([0, -popupHeight / 2], { animate: true });
+      });
+    });
+
+    markers.push(marker);
+  });
+
+  var grup = L.featureGroup(markers);
+  map.fitBounds(grup.getBounds().pad(0.3));
+</script>
+
+</body>
+</html>
